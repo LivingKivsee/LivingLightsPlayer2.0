@@ -141,7 +141,7 @@ void stopFile()
 
 void loop() {
   // Read state from GPIOs and encode
-  reading = (digitalRead(GPIO3) * 8) + (digitalRead(GPIO2) * 4) + (digitalRead(GPIO1) * 2) + digitalRead(GPIO0);
+  reading = (digitalReadFast(GPIO3) * 8) + (digitalReadFast(GPIO2) * 4) + (digitalReadFast(GPIO1) * 2) + digitalReadFast(GPIO0);
   if (reading != lastState) {
     // reset the debouncing timer
     lastDebounceTime = millis();
