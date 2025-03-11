@@ -18,10 +18,12 @@ void setup() {
 
 void loop() {
     // loop through all 8 possible combinations of the 3 output pins
+    delay(10000);
     for (int i = 0; i < 8; i++) {
+        Serial.println(i);
         digitalWrite(OUTGPIO0, i & 1);
         digitalWrite(OUTGPIO1, i & 2);
         digitalWrite(OUTGPIO2, i & 4);
-        delay(10000);
+        delay(1000);
     }
 }

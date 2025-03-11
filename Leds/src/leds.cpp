@@ -84,6 +84,7 @@ void loop()
                 {
                     state = OUT_TRIG1;
                     allowInterrupt = false;
+                    frame_timestamp = sd_leds_player.load_next_frame();
                 }
                 break;
             case TRIG2:
@@ -91,6 +92,7 @@ void loop()
                 {
                     state = OUT_TRIG2;
                     allowInterrupt = false;
+                    frame_timestamp = sd_leds_player.load_next_frame();
                 }
                 break;
             case TRIG3:
@@ -98,6 +100,7 @@ void loop()
                 {
                     state = OUT_TRIG3;
                     allowInterrupt = false;
+                    frame_timestamp = sd_leds_player.load_next_frame();
                 }
                 break;
             default:
