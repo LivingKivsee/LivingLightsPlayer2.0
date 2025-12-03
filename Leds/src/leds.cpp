@@ -5,18 +5,16 @@
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
-#define LEDS_PER_STRIP 690
 #define MAX_BRIGHTNESS 255
 #define DEFAULT_BRIGHTNESS 50 // range is 0 (off) to 255 (max brightness)
 #define STATE_DEBOUNCE_TIME 2
 
 int curr_file_i = 0;
 OutputState back_states[] = {BACK0, BACK1, BACK2, BACK3, BACK4, BACK5, BACK6, BACK7, BACK8, BACK9, BACK10, BACK11};
-const char *files_iter_rr[] = {"pachamama", "overthinker", "pachamama", "overthinker", "pachamama", "overthinker", "pachamama", "overthinker", "pachamama", "overthinker",
-                               "pachamama", "overthinker"}; // Make sure file list is not longer than state list
-const char *file_trig1 = "pachamama";
-const char *file_trig2 = "overthinker";
-const char *file_trig3 = "pachamama";
+const char *files_iter_rr[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}; // Make sure file list is not longer than state list
+const char *file_trig1 = "1";
+const char *file_trig2 = "2";
+const char *file_trig3 = "3";
 
 // Song tracking
 OutputState state, prevState = IDLE;
@@ -29,13 +27,8 @@ bool status;
 /*
  * SdLedsPlayer is the class that handles reading frames from file on SD card,
  * and writing it to the leds.
- * It needs to be initialized with LEDS_PER_STRIP (must match the leds per strips used in the generation
- * of the file written to SD card).
- * It also needs to receive the leds buffer for OctoWS2811, should be initialized as follows
  */
-DMAMEM int display_memory[LEDS_PER_STRIP * 6];
-int drawing_memory[LEDS_PER_STRIP * 6];
-SdLedsPlayer sd_leds_player(LEDS_PER_STRIP, display_memory, drawing_memory);
+SdLedsPlayer sd_leds_player;
 unsigned long frame_timestamp;
 uint8_t brightness = DEFAULT_BRIGHTNESS;
 
@@ -117,9 +110,9 @@ void loop()
         Serial.println(files_iter_rr[state - 1]);
 
         status = sd_leds_player.load_file(files_iter_rr[state - 1]); // minus 1 to translate state to filename because IDLE state is 0
+        curr_file_i = (curr_file_i + 1) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
         if (status)
         {
-            curr_file_i = (curr_file_i + 1) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
             frame_timestamp = sd_leds_player.load_next_frame();
             allowInterrupt = true;
         }
