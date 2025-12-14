@@ -147,11 +147,16 @@ void outputStateEncode (OutputState state) {
 }
 
 void inputStateInit() {
-    pinMode(INGPIO0, INPUT);
-    pinMode(INGPIO1, INPUT);
-    pinMode(INGPIO2, INPUT);
+    pinMode(INGPIO0, INPUT_PULLDOWN);
+    pinMode(INGPIO1, INPUT_PULLDOWN);
+    pinMode(INGPIO2, INPUT_PULLDOWN);
     Serial.print("State input pins set to: ");
     Serial.print(INGPIO0); Serial.print(" "); Serial.print(INGPIO1); Serial.print(" "); Serial.println(INGPIO2);
+    pinMode(RESETGPIO, INPUT_PULLDOWN);
+    pinMode(NEXTGPIO, INPUT_PULLDOWN);
+    pinMode(PREVGPIO, INPUT_PULLDOWN);
+    Serial.print("Control input pins set to: ");
+    Serial.print("Reset: "); Serial.print(RESETGPIO); Serial.print(" Next: "); Serial.print(NEXTGPIO); Serial.print(" Prev: "); Serial.println(PREVGPIO);
 }
 
 // Read state from GPIOs and decode
