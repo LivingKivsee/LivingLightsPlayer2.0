@@ -77,7 +77,7 @@ void loop()
     // unsigned long tic = millis();
 
     // Check for reset signal
-    if (digitalRead(RESETGPIO) == HIGH)
+    if (digitalRead(RESETGPIO) == LOW)
     {
         Serial.println("Reset signal detected, restarting...");
         delay(100);
@@ -86,7 +86,7 @@ void loop()
 
     // Check NEXT button with debouncing
     int nextButtonState = digitalRead(NEXTGPIO);
-    if (nextButtonState == HIGH && lastNextButtonState == LOW && (millis() - lastNextDebounceTime) > BUTTON_DEBOUNCE_TIME)
+    if (nextButtonState == LOW && lastNextButtonState == HIGH && (millis() - lastNextDebounceTime) > BUTTON_DEBOUNCE_TIME)
     {
         curr_file_i = (curr_file_i + 1) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
         Serial.print("NEXT pressed, playing curr_file_i = ");
@@ -103,7 +103,7 @@ void loop()
 
     // Check PREV button with debouncing
     int prevButtonState = digitalRead(PREVGPIO);
-    if (prevButtonState == HIGH && lastPrevButtonState == LOW && (millis() - lastPrevDebounceTime) > BUTTON_DEBOUNCE_TIME)
+    if (prevButtonState == LOW && lastPrevButtonState == HIGH && (millis() - lastPrevDebounceTime) > BUTTON_DEBOUNCE_TIME)
     {
         curr_file_i = (curr_file_i - 1 + (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]))) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
         Serial.print("PREV pressed, playing curr_file_i = ");
