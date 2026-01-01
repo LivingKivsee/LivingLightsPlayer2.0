@@ -8,13 +8,14 @@
 #define MAX_BRIGHTNESS 255
 #define DEFAULT_BRIGHTNESS 50 // range is 0 (off) to 255 (max brightness)
 #define STATE_DEBOUNCE_TIME 2
+#define BUTTON_DEBOUNCE_TIME 300
 
 int curr_file_i = 0;
 OutputState back_states[] = {BACK0, BACK1, BACK2, BACK3, BACK4, BACK5, BACK6, BACK7, BACK8, BACK9, BACK10, BACK11};
 const char *files_iter_rr[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}; // Make sure file list is not longer than state list
-const char *file_trig1 = "1";
-const char *file_trig2 = "2";
-const char *file_trig3 = "3";
+const char *file_trig1 = "13";
+const char *file_trig2 = "14";
+const char *file_trig3 = "15";
 
 // Song tracking
 OutputState state, prevState = IDLE;
@@ -23,6 +24,12 @@ unsigned long currSongTime = 0, songStartTime = 0, procTime = 0;
 unsigned long stateDebounceDelay = STATE_DEBOUNCE_TIME;
 bool allowInterrupt = true;
 bool status;
+
+// Button debouncing variables
+int lastNextButtonState = LOW;
+int lastPrevButtonState = LOW;
+unsigned long lastNextDebounceTime = 0;
+unsigned long lastPrevDebounceTime = 0;
 
 /*
  * SdLedsPlayer is the class that handles reading frames from file on SD card,
@@ -61,6 +68,48 @@ void setup()
 void loop()
 {
     // unsigned long tic = millis();
+
+    // Check for reset signal
+    if (digitalRead(RESETGPIO) == LOW)
+    {
+        Serial.println("Reset signal detected, restarting...");
+        delay(100);
+        CPU_RESTART
+    }
+
+    // Check NEXT button with debouncing
+    int nextButtonState = digitalRead(NEXTGPIO);
+    if (nextButtonState == LOW && lastNextButtonState == HIGH && (millis() - lastNextDebounceTime) > BUTTON_DEBOUNCE_TIME)
+    {
+        curr_file_i = (curr_file_i + 1) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
+        Serial.print("NEXT pressed, playing curr_file_i = ");
+        Serial.println(curr_file_i);
+        state = back_states[curr_file_i];
+        status = sd_leds_player.load_file(files_iter_rr[state - 1]); // minus 1 to translate state to filename because IDLE state is 0
+        if (status)
+        {
+            frame_timestamp = sd_leds_player.load_next_frame();
+        }
+        lastNextDebounceTime = millis();
+    }
+    lastNextButtonState = nextButtonState;
+
+    // Check PREV button with debouncing
+    int prevButtonState = digitalRead(PREVGPIO);
+    if (prevButtonState == LOW && lastPrevButtonState == HIGH && (millis() - lastPrevDebounceTime) > BUTTON_DEBOUNCE_TIME)
+    {
+        curr_file_i = (curr_file_i - 1 + (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]))) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
+        Serial.print("PREV pressed, playing curr_file_i = ");
+        Serial.println(curr_file_i);
+        state = back_states[curr_file_i];
+        status = sd_leds_player.load_file(files_iter_rr[state - 1]); // minus 1 to translate state to filename because IDLE state is 0
+        if (status)
+        {
+            frame_timestamp = sd_leds_player.load_next_frame();
+        }
+        lastPrevDebounceTime = millis();
+    }
+    lastPrevButtonState = prevButtonState;
 
     // if song interruption is allowed, read state from GPIOs and decode
     if (allowInterrupt)
