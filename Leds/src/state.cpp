@@ -2,18 +2,18 @@
 #include "state.h"
 
 
-void stateInit() {
+void outputStateInit() {
     pinMode(OUTGPIO0, OUTPUT);
     pinMode(OUTGPIO1, OUTPUT);
     pinMode(OUTGPIO2, OUTPUT);
     pinMode(OUTGPIO3, OUTPUT);
-    stateEncode(IDLE);
+    outputStateEncode(IDLE);
     Serial.print("State output pins set to: ");
     Serial.print(OUTGPIO0); Serial.print(" "); Serial.print(OUTGPIO1); Serial.print(" "); Serial.print(OUTGPIO2); Serial.print(" "); Serial.println(OUTGPIO3);
 }
 
 
-void stateEncode (enum State state) {
+void outputStateEncode (OutputState state) {
   Serial.print("Changing to state: "); Serial.println(state);
   switch (state) {
     // default state that does nothing is required, do not use
@@ -116,21 +116,21 @@ void stateEncode (enum State state) {
       digitalWriteFast(OUTGPIO3, HIGH);
       break;
 
-    case BACK12:
+    case OUT_TRIG1:
       digitalWriteFast(OUTGPIO0, HIGH);
       digitalWriteFast(OUTGPIO1, LOW);
       digitalWriteFast(OUTGPIO2, HIGH);
       digitalWriteFast(OUTGPIO3, HIGH);
       break;
 
-    case BACK13:
+    case OUT_TRIG2:
       digitalWriteFast(OUTGPIO0, LOW);
       digitalWriteFast(OUTGPIO1, HIGH);
       digitalWriteFast(OUTGPIO2, HIGH);
       digitalWriteFast(OUTGPIO3, HIGH);
       break;
 
-    case BACK14:
+    case OUT_TRIG3:
       digitalWriteFast(OUTGPIO0, HIGH);
       digitalWriteFast(OUTGPIO1, HIGH);
       digitalWriteFast(OUTGPIO2, HIGH);
@@ -143,5 +143,35 @@ void stateEncode (enum State state) {
       digitalWriteFast(OUTGPIO2, LOW);
       digitalWriteFast(OUTGPIO3, LOW);
       break;
+  }
+}
+
+void inputStateInit() {
+    pinMode(INGPIO0, INPUT_PULLDOWN);
+    pinMode(INGPIO1, INPUT_PULLDOWN);
+    pinMode(INGPIO2, INPUT_PULLDOWN);
+    Serial.print("State input pins set to: ");
+    Serial.print(INGPIO0); Serial.print(" "); Serial.print(INGPIO1); Serial.print(" "); Serial.println(INGPIO2);
+    pinMode(RESETGPIO, INPUT_PULLUP);
+    pinMode(NEXTGPIO, INPUT_PULLUP);
+    pinMode(PREVGPIO, INPUT_PULLUP);
+    Serial.print("Control input pins set to: ");
+    Serial.print("Reset: "); Serial.print(RESETGPIO); Serial.print(" Next: "); Serial.print(NEXTGPIO); Serial.print(" Prev: "); Serial.println(PREVGPIO);
+}
+
+// Read state from GPIOs and decode
+InputState inputStateDecode() {
+  char reading = (digitalReadFast(INGPIO2) * 4) + (digitalReadFast(INGPIO1) * 2) + digitalReadFast(INGPIO0);
+  switch (reading) {
+    case 0: // default state that does nothing is required, do not use
+      return NOTRIG;
+    case 1:
+      return TRIG1;
+    case 2:
+      return TRIG2;
+    case 4:
+      return TRIG3;
+    default: // reading can go up to 7
+      return NOTRIG;
   }
 }
