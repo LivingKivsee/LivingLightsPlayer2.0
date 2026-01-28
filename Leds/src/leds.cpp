@@ -77,6 +77,7 @@ void loop()
     {
         Serial.println("Reset signal detected, restarting...");
         sd_leds_player.logEvent("RESET_SIGNAL_DETECTED");
+        sd_leds_player.closeLogging();
         delay(100);
         CPU_RESTART
     }
