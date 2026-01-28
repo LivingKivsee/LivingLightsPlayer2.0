@@ -59,6 +59,9 @@ void setup()
     Serial.print(" out of ");
     Serial.println(MAX_BRIGHTNESS);
 
+    // Initialize logging
+    sd_leds_player.enableLogging();
+
     // Teensies State setup
     outputStateInit();
     inputStateInit();
@@ -73,6 +76,7 @@ void loop()
     if (digitalRead(RESETGPIO) == LOW)
     {
         Serial.println("Reset signal detected, restarting...");
+        sd_leds_player.logEvent("RESET_SIGNAL_DETECTED");
         delay(100);
         CPU_RESTART
     }
@@ -88,6 +92,7 @@ void loop()
         status = sd_leds_player.load_file(files_iter_rr[state - 1]); // minus 1 to translate state to filename because IDLE state is 0
         if (status)
         {
+            sd_leds_player.logFileTransition(files_iter_rr[state - 1], "NEXT_BUTTON");
             frame_timestamp = sd_leds_player.load_next_frame();
         }
         lastNextDebounceTime = millis();
@@ -105,6 +110,7 @@ void loop()
         status = sd_leds_player.load_file(files_iter_rr[state - 1]); // minus 1 to translate state to filename because IDLE state is 0
         if (status)
         {
+            sd_leds_player.logFileTransition(files_iter_rr[state - 1], "PREV_BUTTON");
             frame_timestamp = sd_leds_player.load_next_frame();
         }
         lastPrevDebounceTime = millis();
@@ -124,6 +130,7 @@ void loop()
             case TRIG1:
                 if (sd_leds_player.load_file(file_trig1))
                 {
+                    sd_leds_player.logFileTransition(file_trig1, "TRIGGER_1");
                     state = OUT_TRIG1;
                     allowInterrupt = false;
                     frame_timestamp = sd_leds_player.load_next_frame();
@@ -132,6 +139,7 @@ void loop()
             case TRIG2:
                 if (sd_leds_player.load_file(file_trig2))
                 {
+                    sd_leds_player.logFileTransition(file_trig2, "TRIGGER_2");
                     state = OUT_TRIG2;
                     allowInterrupt = false;
                     frame_timestamp = sd_leds_player.load_next_frame();
@@ -140,6 +148,7 @@ void loop()
             case TRIG3:
                 if (sd_leds_player.load_file(file_trig3))
                 {
+                    sd_leds_player.logFileTransition(file_trig3, "TRIGGER_3");
                     state = OUT_TRIG3;
                     allowInterrupt = false;
                     frame_timestamp = sd_leds_player.load_next_frame();
@@ -162,6 +171,7 @@ void loop()
         curr_file_i = (curr_file_i + 1) % (sizeof(files_iter_rr) / sizeof(files_iter_rr[0]));
         if (status)
         {
+            sd_leds_player.logFileTransition(files_iter_rr[state - 1], "BACKGROUND_LOOP");
             frame_timestamp = sd_leds_player.load_next_frame();
             allowInterrupt = true;
         }
